@@ -1,10 +1,10 @@
-package ast
+package parser
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/AntonioAlejandro01/SOL_Lexer"
+	lexer "github.com/AntonioAlejandro01/SOL_Lexer"
 )
 
 // AstNode -  node ast

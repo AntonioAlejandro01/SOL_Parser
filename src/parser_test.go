@@ -1,10 +1,10 @@
-package ast
+package parser
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/AntonioAlejandro01/SOL_Lexer"
+	lexer "github.com/AntonioAlejandro01/SOL_Lexer/src"
 )
 
 func TestParseProgram(t *testing.T) {

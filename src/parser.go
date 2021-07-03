@@ -1,9 +1,9 @@
-package ast
+package parser
 
 import (
 	"errors"
 
-	"github.com/AntonioAlejandro01/SOL_Lexer"
+	lexer "github.com/AntonioAlejandro01/SOL_Lexer"
 )
 
 // Parser - Parser
