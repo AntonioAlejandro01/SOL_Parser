@@ -1,8 +1,19 @@
 package parser
 
 import (
+	"fmt"
+
 	lexer "github.com/AntonioAlejandro01/SOL_Lexer/src"
 )
+
+// NewParser - Create a new Parser
+func NewParser(program string) *Parser {
+	parser := &Parser{lexer: lexer.NewLexer(program)}
+
+	parser.peekToken = parser.lexer.NextToken()
+
+	return parser
+}
 
 // Parser - Parser
 type Parser struct {
@@ -14,21 +25,35 @@ type Parser struct {
 func (p *Parser) ParseProgram() Program {
 	rootStatement := ServiceStatement{}
 	bases := []*BaseStatement{}
+	if !p.expectedToken(lexer.SERVICE) {
+		panic("The Service have to start with keyword service")
+	}
+	if !p.expectedToken(lexer.COLON) {
+		panic("Bad service structure")
+	}
+	if !p.expectedToken(lexer.LBRACE) {
+		panic("Bad service structure")
+	}
+
 	for p.expectedToken(lexer.BASE) {
 		bases = append(bases, p.parseBaseStatement())
 	}
 	rootStatement.bases = bases
 
 	if p.expectedToken(lexer.SERVICEOPTIONS) {
-		rootStatement.options = p.parseOptionsStatement()
+		rootStatement.options = p.parseStatementMap(false)
 	}
 
 	if p.expectedToken(lexer.BEFORE) {
-		rootStatement.before = p.parseBeforeStatement()
+		rootStatement.before = p.parseStatementMap(true)
 	}
 
 	if p.expectedToken(lexer.ERRORSHANDLERS) {
-		rootStatement.errorsHandlers = p.parseErrorsHandlersStatement()
+		rootStatement.errorsHandlers = p.parseStatementMap(false)
+	}
+
+	if !p.expectedToken(lexer.RBRACE) {
+		panic("Service Block maybe not closed")
 	}
 
 	if !p.expectedToken(lexer.EOF) {
@@ -38,19 +63,42 @@ func (p *Parser) ParseProgram() Program {
 	return Program(rootStatement)
 }
 
-func (p *Parser) parseOptionsStatement() *OptionsStatement {
-	//TODO: Method
-	return &OptionsStatement{}
-}
+func (p *Parser) parseStatementMap(isBeforeStatement bool) map[string]string {
+	if !p.expectedToken(lexer.COLON) {
+		panic("Expected colon after Options declaration")
+	}
+	if !p.expectedToken(lexer.LBRACE) {
+		panic("Expected Left curly Braces to start block of options")
+	}
+	var key string
+	var value string
+	mapOptions := make(map[string]string)
 
-func (p *Parser) parseBeforeStatement() *BeforeStatement {
-	//TODO: Method
-	return &BeforeStatement{}
-}
+	for !p.expectedToken(lexer.RBRACE) {
 
-func (p *Parser) parseErrorsHandlersStatement() *ErrorsHandlersStatement {
-	//TODO: Method
-	return &ErrorsHandlersStatement{}
+		if p.expectedToken(lexer.EOF) {
+			panic("Malformed file")
+		}
+
+		if !p.expectedToken(lexer.IDENT) && isBeforeStatement && !p.expectedToken(lexer.ALL) {
+			panic("Expected Key for options value")
+		}
+		key = p.currentToken.Literal
+		if !p.expectedToken(lexer.AS) {
+			panic("Expected Key word as for associated value to options key")
+		}
+
+		if !p.expectedToken(lexer.IDENT) {
+			panic(fmt.Sprintf("Expected Value for options key %s", key))
+		}
+
+		value = p.currentToken.Literal
+		mapOptions[key] = value
+		if !p.expectedToken(lexer.COMMA) {
+			panic("Expected comma after each key value pair")
+		}
+	}
+	return mapOptions
 }
 
 func (p *Parser) parseBaseStatement() *BaseStatement {
@@ -86,9 +134,19 @@ func (p *Parser) parseBaseStatement() *BaseStatement {
 }
 
 func (p *Parser) parseEndpointStatement() *EndpointStatement {
+	if !p.expectedToken(lexer.IDENT) {
+		panic("Endpoint needed path")
+	}
 	endpointStatement := &EndpointStatement{
 		endpoint: p.currentToken.Literal,
 		methods:  make(map[string]*MethodStatement),
+	}
+	if !p.expectedToken(lexer.COLON) {
+		panic("EXPECTED COLON")
+	}
+
+	if !p.expectedToken(lexer.LBRACE) {
+		panic("EXPECTED Left Brace")
 	}
 
 	for p.expectedToken(lexer.GET) ||
@@ -99,7 +157,8 @@ func (p *Parser) parseEndpointStatement() *EndpointStatement {
 		p.expectedToken(lexer.HEAD) ||
 		p.expectedToken(lexer.DELETE) {
 
-		endpointStatement.methods[p.currentToken.Literal] = p.parseMethodStatement()
+		method := p.currentToken.Literal
+		endpointStatement.methods[method] = p.parseMethodStatement()
 
 	}
 
@@ -140,13 +199,13 @@ func (p *Parser) parseMethodStatement() *MethodStatement {
 		panic("Missing Params declaration")
 	}
 
-	method.params = p.parseParamsStatement()
+	method.params = p.parseStatementMap(false)
 
 	if !p.expectedToken(lexer.HEADERS) {
 		panic("Missing Headers Declaration")
 	}
 
-	method.headers = p.parseHeadersStatement()
+	method.headers = p.parseStatementMap(false)
 
 	if !p.expectedToken(lexer.RBRACE) {
 		panic("Method declaration not closed")
@@ -155,18 +214,16 @@ func (p *Parser) parseMethodStatement() *MethodStatement {
 	return method
 }
 
-func (p *Parser) parseHeadersStatement() *HeaderStatement {
-	//TODO: Method
-	return &HeaderStatement{}
-}
-
-func (p *Parser) parseParamsStatement() *ParamsStatement {
-	//TODO: Method
-	return &ParamsStatement{}
-}
-
 func (p *Parser) parseBodyStatement() *BodyStatement {
-	//TODO: Method
+	if !p.expectedToken(lexer.COLON) {
+		panic("After Body need colon")
+	}
+	if !p.expectedToken(lexer.LBRACE) {
+		panic("Block start with left brace")
+	}
+	if !p.expectedToken(lexer.RBRACE) {
+		panic("Block start with rigth brace")
+	}
 	return &BodyStatement{}
 }
 
@@ -181,11 +238,4 @@ func (p *Parser) expectedToken(tt lexer.TokenType) bool {
 		return true
 	}
 	return false
-}
-
-// NewParser - Create a new Parser
-func NewParser(program string) *Parser {
-	return &Parser{
-		lexer: lexer.NewLexer(program),
-	}
 }

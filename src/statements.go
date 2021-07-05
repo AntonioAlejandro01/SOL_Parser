@@ -1,17 +1,13 @@
 package parser
 
+type Program ServiceStatement
+
 type ServiceStatement struct {
 	bases          []*BaseStatement
-	options        *OptionsStatement
-	before         *BeforeStatement
-	errorsHandlers *ErrorsHandlersStatement
+	options        map[string]string
+	before         map[string]string
+	errorsHandlers map[string]string
 }
-
-type OptionsStatement map[string]string
-
-type BeforeStatement map[string]string
-
-type ErrorsHandlersStatement map[string]string
 
 type BaseStatement struct {
 	basePath  string
@@ -26,19 +22,9 @@ type EndpointStatement struct {
 type MethodStatement struct {
 	handler string
 	body    *BodyStatement
-	params  *ParamsStatement
-	headers *HeaderStatement
+	params  map[string]string
+	headers map[string]string
 }
 
 type BodyStatement struct {
-}
-
-type ParamsStatement struct {
-	name string
-	typ  string
-}
-
-type HeaderStatement struct {
-	name  string
-	alias string
 }
