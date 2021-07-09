@@ -3,27 +3,27 @@ package parser
 type Program ServiceStatement
 
 type ServiceStatement struct {
-	bases          []*BaseStatement
-	options        map[string]string
-	before         map[string]string
-	errorsHandlers map[string]string
+	Bases          []*BaseStatement
+	Options        map[string]string
+	Before         map[string]string
+	ErrorsHandlers map[string]string
 }
 
 type BaseStatement struct {
-	basePath  string
-	endpoints []*EndpointStatement
+	BasePath  string
+	Endpoints []*EndpointStatement
 }
 
 type EndpointStatement struct {
-	endpoint string
-	methods  map[string]*MethodStatement
+	Endpoint string
+	Methods  map[string]*MethodStatement
 }
 
 type MethodStatement struct {
-	handler string
-	body    *BodyStatement
-	params  map[string]string
-	headers map[string]string
+	Handler string
+	Body    *BodyStatement
+	Params  map[string]string
+	Headers map[string]string
 }
 
 type BodyStatement struct {

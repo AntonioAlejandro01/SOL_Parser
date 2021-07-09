@@ -38,18 +38,18 @@ func (p *Parser) ParseProgram() Program {
 	for p.expectedToken(lexer.BASE) {
 		bases = append(bases, p.parseBaseStatement())
 	}
-	rootStatement.bases = bases
+	rootStatement.Bases = bases
 
 	if p.expectedToken(lexer.SERVICEOPTIONS) {
-		rootStatement.options = p.parseStatementMap(false)
+		rootStatement.Options = p.parseStatementMap(false)
 	}
 
 	if p.expectedToken(lexer.BEFORE) {
-		rootStatement.before = p.parseStatementMap(true)
+		rootStatement.Before = p.parseStatementMap(true)
 	}
 
 	if p.expectedToken(lexer.ERRORSHANDLERS) {
-		rootStatement.errorsHandlers = p.parseStatementMap(false)
+		rootStatement.ErrorsHandlers = p.parseStatementMap(false)
 	}
 
 	if !p.expectedToken(lexer.RBRACE) {
@@ -107,9 +107,9 @@ func (p *Parser) parseBaseStatement() *BaseStatement {
 	// Starting base path
 	if p.expectedToken(lexer.IDENT) {
 		isCustomPath = true
-		baseStatement.basePath = p.currentToken.Literal
+		baseStatement.BasePath = p.currentToken.Literal
 	} else if p.expectedToken(lexer.COLON) {
-		baseStatement.basePath = "/"
+		baseStatement.BasePath = "/"
 	} else {
 		panic("Bad Structure in BASE Statement. Remain colon before BASE statement")
 	}
@@ -124,7 +124,7 @@ func (p *Parser) parseBaseStatement() *BaseStatement {
 	// Starting Endpoints
 
 	for !p.expectedToken(lexer.RBRACE) {
-		baseStatement.endpoints = append(baseStatement.endpoints, p.parseEndpointStatement())
+		baseStatement.Endpoints = append(baseStatement.Endpoints, p.parseEndpointStatement())
 		if p.expectedToken(lexer.EOF) {
 			panic("Malformed BASE")
 		}
@@ -138,8 +138,8 @@ func (p *Parser) parseEndpointStatement() *EndpointStatement {
 		panic("Endpoint needed path")
 	}
 	endpointStatement := &EndpointStatement{
-		endpoint: p.currentToken.Literal,
-		methods:  make(map[string]*MethodStatement),
+		Endpoint: p.currentToken.Literal,
+		Methods:  make(map[string]*MethodStatement),
 	}
 	if !p.expectedToken(lexer.COLON) {
 		panic("EXPECTED COLON")
@@ -158,7 +158,7 @@ func (p *Parser) parseEndpointStatement() *EndpointStatement {
 		p.expectedToken(lexer.DELETE) {
 
 		method := p.currentToken.Literal
-		endpointStatement.methods[method] = p.parseMethodStatement()
+		endpointStatement.Methods[method] = p.parseMethodStatement()
 
 	}
 
@@ -179,7 +179,7 @@ func (p *Parser) parseMethodStatement() *MethodStatement {
 		panic("Expected Handler to be used with this method")
 	}
 
-	method.handler = p.currentToken.Literal
+	method.Handler = p.currentToken.Literal
 
 	if !p.expectedToken(lexer.COLON) {
 		panic("Expected Colon after handlerDeclaration")
@@ -193,19 +193,19 @@ func (p *Parser) parseMethodStatement() *MethodStatement {
 		panic("Missing Body declaration")
 	}
 
-	method.body = p.parseBodyStatement()
+	method.Body = p.parseBodyStatement()
 
 	if !p.expectedToken(lexer.PARAMS) {
 		panic("Missing Params declaration")
 	}
 
-	method.params = p.parseStatementMap(false)
+	method.Params = p.parseStatementMap(false)
 
 	if !p.expectedToken(lexer.HEADERS) {
 		panic("Missing Headers Declaration")
 	}
 
-	method.headers = p.parseStatementMap(false)
+	method.Headers = p.parseStatementMap(false)
 
 	if !p.expectedToken(lexer.RBRACE) {
 		panic("Method declaration not closed")

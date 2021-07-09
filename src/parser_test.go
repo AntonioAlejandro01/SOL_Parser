@@ -25,38 +25,38 @@ func TestParseProgramOk(t *testing.T) {
 
 	methodExpected := make(map[string]*MethodStatement)
 	methodExpected["GET"] = &MethodStatement{
-		handler: "handlerText",
-		body:    &BodyStatement{},
-		params:  paramsExpected,
-		headers: headersExpected,
+		Handler: "handlerText",
+		Body:    &BodyStatement{},
+		Params:  paramsExpected,
+		Headers: headersExpected,
 	}
 	baseExpected := &BaseStatement{
-		basePath: "random",
-		endpoints: []*EndpointStatement{
+		BasePath: "random",
+		Endpoints: []*EndpointStatement{
 			{
-				endpoint: "text",
-				methods:  methodExpected,
+				Endpoint: "text",
+				Methods:  methodExpected,
 			},
 		},
 	}
 
 	expectedProgram := Program(ServiceStatement{
-		bases:          []*BaseStatement{baseExpected},
-		options:        make(map[string]string),
-		before:         beforeExpected,
-		errorsHandlers: errorsHandlersExpected,
+		Bases:          []*BaseStatement{baseExpected},
+		Options:        make(map[string]string),
+		Before:         beforeExpected,
+		ErrorsHandlers: errorsHandlersExpected,
 	})
 
 	parser := NewParser(source)
 
 	program := parser.ParseProgram()
 
-	if len(expectedProgram.bases) != len(program.bases) {
-		t.Errorf("Expected bases are %d but got %d", len(expectedProgram.bases), len(program.bases))
+	if len(expectedProgram.Bases) != len(program.Bases) {
+		t.Errorf("Expected bases are %d but got %d", len(expectedProgram.Bases), len(program.Bases))
 	}
 
-	if len(expectedProgram.before) != len(program.before) {
-		t.Errorf("Expected before are %d but got %d", len(expectedProgram.bases), len(program.bases))
+	if len(expectedProgram.Before) != len(program.Before) {
+		t.Errorf("Expected before are %d but got %d", len(expectedProgram.Bases), len(program.Bases))
 	}
 
 }
