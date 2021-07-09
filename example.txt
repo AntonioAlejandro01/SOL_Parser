@@ -1,25 +1,30 @@
-Service : {
-    Base "random":{
-        "text": { /* Endpoint /random/text?size=10 */
-            GET as handlerText : {
-                Body : {}
-                Params: {
-	                size as int
+service: {
+    base random: {
+        text :{
+            GET as handlerText: {
+                body : {}
+                params: {
+	                size as number,
                 }
-                Headers: {
+                headers: {
                     Authorization as token,
-                    Cookie as cookie
+                    Cookie as cookie,
                 }
             }
         }
-    }   
-	Options:{}
-	Before:{   
-		* as middlewareAuth,
-        "text" as middlewareAuthText
     }
-	ErrorsHandlers : {
-		"Error" as  handlerError
-		"CustomError" as handleError
+
+    options: {
+            
+    }
+
+    before: {
+        * as middlewareAuth,
+        text as middlewareAuthText,
+    }
+
+    errorsHandlers: {
+	    Error as  handlerError,
+		CustomError as handleError,
     }
 }
